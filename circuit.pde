@@ -18,6 +18,7 @@ boolean toucheZ;
 boolean toucheQ;
 boolean toucheS;
 boolean toucheD;
+boolean modeNuit = false;
 
 PVector posVoiture2 = new PVector(2.,0.5);
 float vitesseVoiture2 = 0.004;
@@ -53,9 +54,32 @@ void setup(){
   //code pour l'effet de texture
   goudron = createImage(256,256,RGB); //creation d'une image vide
   goudron.loadPixels();
-  for(int i = 0; i < goudron.pixels.length; i++){
-    float texture = random(15,30);
-    goudron.pixels[i] = (color)texture;
+  int n = goudron.pixels.length;
+  
+  for(int i = 0; i < n; i++){
+    int x = i % 256;
+    int y = i / 256;
+    float texture = random(0,100);
+    boolean rouge = (y/32)%2 == 0;
+    boolean ligneBlanche = (y/32)%2 == 0;
+    color couleurBord;
+    if (rouge){
+      couleurBord = color(255,0,0);
+    } else {
+      couleurBord = color(255); //couleur blanc
+    }
+    
+    if (x < 20 || x > 235){
+      goudron.pixels[i] = couleurBord;
+    } else if (x > 125 && x < 131){
+      if (ligneBlanche){
+        goudron.pixels[i] = color(255);
+      } else {
+        goudron.pixels[i] = color(texture);
+      }
+    } else {
+      goudron.pixels[i] = color(texture);
+    }
   }
   goudron.updatePixels();
   
@@ -69,21 +93,21 @@ void setup(){
 void creerCircuit(){
   pointsControle = new ArrayList<>();
   
-  pointsControle.add(new PVector(-400,200,0));
-  pointsControle.add(new PVector(-400,200,-400));
-  pointsControle.add(new PVector(-100,200,-100));
-  pointsControle.add(new PVector(0,200,-100));
+  pointsControle.add(new PVector(-1200,200,0));
+  pointsControle.add(new PVector(-1200,200,-1200));
+  pointsControle.add(new PVector(-300,200,-300));
+  pointsControle.add(new PVector(0,200,-300));
   
-  pointsControle.add(new PVector(100,200,-100));
-  pointsControle.add(new PVector(400,200,-400));
-  pointsControle.add(new PVector(400,200,0));
+  pointsControle.add(new PVector(300,200,-300));
+  pointsControle.add(new PVector(1200,200,-1200));
+  pointsControle.add(new PVector(1200,200,0));
   
-  pointsControle.add(new PVector(400,200,400));
-  pointsControle.add(new PVector(100,200,100));
-  pointsControle.add(new PVector(0,200,100));
+  pointsControle.add(new PVector(1200,200,1200));
+  pointsControle.add(new PVector(300,200,300));
+  pointsControle.add(new PVector(0,200,300));
   
-  pointsControle.add(new PVector(-100,200,100));
-  pointsControle.add(new PVector(-400,200,400));
+  pointsControle.add(new PVector(-300,200,300));
+  pointsControle.add(new PVector(-1200,200,1200));
 }
 
 //tracage du circuit 
@@ -262,7 +286,12 @@ void draw(){
     }
     
     posVoiture1.x += vitesseVoiture1;
+    
+    if (!toucheZ){ //on reduit la vitesse lorsqu'on appuie pas sur Z pour donner un effet de friction
+      vitesseVoiture1 *= 0.96;
     }
+    
+ }
   
   //creation de la voiture 1
   PVector centreV1 = calculerPointSurCourbe(posVoiture1.x);
@@ -308,9 +337,18 @@ void draw(){
   
   background(105,207,255);
   //lights();
+  
+  if (modeNuit){
+    background(5,10,25);
+    ambientLight(40, 40, 60);
+  }
 
   if (!etatJeu){
-    camera(0,-800,0,0,200,0,0,0,-1); //on se place en vue du dessus 
+    //on utilise les fonctions cos et sin pour créer un effet de 
+    //rotation pendant le mode menu
+    float angleRot = -frameCount * 0.003;
+    float rayonRot = 2000;
+    camera(cos(angleRot)*rayonRot,-800,sin(angleRot)*rayonRot,0,200,0,0,1,0); //on se place en vue du dessus 
   } else {
     float camX = car1X - dirX1 * 300;
     float camY = 50;
@@ -334,10 +372,10 @@ void draw(){
   
   beginShape(QUADS);
   texture(solTexture);
-  vertex(-2000,-2000,0,1/4.,2/3.);
-  vertex(2000,-2000,0,2/4.,2/3.);
-  vertex(2000,2000,0,2/4.,1.);
-  vertex(-2000,2000,0,1/4.,1.);
+  vertex(-2020,-2020,0,1/4.,2/3.);
+  vertex(2020,-2020,0,2/4.,2/3.);
+  vertex(2020,2020,0,2/4.,1.);
+  vertex(-2020,2020,0,1/4.,1.);
   endShape();
   
   popMatrix();
@@ -375,6 +413,10 @@ void keyPressed(){
   if (key == ' '){
     etatJeu = !etatJeu;
     if(etatJeu){ vitesseVoiture1 = 0;}
+  }
+  
+  if (key == 'n'){
+    modeNuit = !modeNuit;
   }
 
   //haut (acceleration)
