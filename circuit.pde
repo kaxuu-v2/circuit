@@ -12,6 +12,8 @@ PImage goudron;
 PVector posVoiture1 = new PVector(0.,0.); 
 float vitesseVoiture1 = 0.005; //valeur arbitraire
 boolean etatJeu = false; //si false le jeu n'est pas en cours, true sinon
+float car1X, car1Z;
+float car2X, car2Z;
 
 //booleéns pour stocker quand la touche est appuyée puis relachée 
 boolean toucheZ;
@@ -308,9 +310,8 @@ void draw(){
   float orthoX1 = -dirZ1;
   float orthoZ1 = dirX1;
   
-  //calcul de la position finale 
-  float car1X = centreV1.x + orthoX1 * 60 * posVoiture1.y;
-  float car1Z = centreV1.z + orthoZ1 * 60 * posVoiture1.y;
+  car1X = centreV1.x + orthoX1 * 60 * posVoiture1.y;
+  car1Z = centreV1.z + orthoZ1 * 60 * posVoiture1.y;
   
   float angleV1 = atan2(dirX1, dirZ1);
  
@@ -330,8 +331,8 @@ void draw(){
   float orthoZ2 = dirX2;
   
   //calcul de la position finale 
-  float car2X = centreV2.x + orthoX2 * 60 * posVoiture2.y;
-  float car2Z = centreV2.z + orthoZ2 * 60 * posVoiture2.y;
+  car2X = centreV2.x + orthoX2 * 60 * posVoiture2.y;
+  car2Z = centreV2.z + orthoZ2 * 60 * posVoiture2.y;
   
   float angleV2 = atan2(dirX2, dirZ2);
   
@@ -339,9 +340,9 @@ void draw(){
   //lights();
   
   if (modeNuit){
-    background(5,10,25);
-    ambientLight(40, 40, 60);
-  }
+    background(0,10,25);
+    ambientLight(30, 30, 50);
+   } 
 
   if (!etatJeu){
     //on utilise les fonctions cos et sin pour créer un effet de 
@@ -381,7 +382,6 @@ void draw(){
   popMatrix();
   
   route();
-
 /*
   //ecouteur souris (utilisé pour les tests)
   float angleY = map(mouseX, 0, width, -PI, PI);
@@ -405,7 +405,55 @@ void draw(){
   scale(15);
   shape(voiture);
   popMatrix();
+  
+  dessinerMinimap();
+
   }
+  
+void dessinerMinimap(){
+  hint(DISABLE_DEPTH_TEST);
+  pushMatrix();
+  pushStyle();
+  camera();
+  
+  fill(20,150);
+  noStroke();
+  rect(20,20,250,250,10);
+  
+  translate(145,145);
+  scale(0.08); //on reduit le circuit pour le faire tenir dans le rectangle
+  
+  stroke(255,220);
+  strokeWeight(30);
+  noFill();
+  
+  beginShape();
+  for (int i = 0; i < 12; i+=3){
+    PVector p0 = pointsControle.get(i);
+    PVector p1 = pointsControle.get((i+1)%12);
+    PVector p2 = pointsControle.get((i+2)%12);
+    PVector p3 = pointsControle.get((i+3)%12);
+    for (float t = 0; t <= 1; t+=0.05){
+      float x = bezierPoint(p0.x, p1.x, p2.x, p3.x, t);
+      float z = bezierPoint(p0.z, p1.z, p2.z, p3.z, t);
+      vertex(x,z);
+    }
+  }
+  endShape(CLOSE);
+  
+  strokeWeight(20);
+  stroke(255, 0, 0);
+  fill(255,0,0); //joueur en point rouge
+  ellipse(car1X, car1Z, 120, 120);
+  
+  stroke(0,0,255);
+  fill(0,0,255); //ordi en bleu
+  ellipse(car2X, car2Z, 120, 120);
+  
+  popStyle();
+  popMatrix();
+  hint(ENABLE_DEPTH_TEST);
+}
 
 
 void keyPressed(){
