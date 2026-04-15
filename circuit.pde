@@ -103,11 +103,10 @@ void creerCircuit(){
   pointsControle.add(new PVector(300,200,-300));
   pointsControle.add(new PVector(1200,200,-1200));
   pointsControle.add(new PVector(1200,200,0));
-  
   pointsControle.add(new PVector(1200,200,1200));
+  
   pointsControle.add(new PVector(300,200,300));
   pointsControle.add(new PVector(0,200,300));
-  
   pointsControle.add(new PVector(-300,200,300));
   pointsControle.add(new PVector(-1200,200,1200));
 }
@@ -341,7 +340,17 @@ void draw(){
   
   if (modeNuit){
     background(0,10,25);
-    ambientLight(30, 30, 50);
+    ambientLight(50, 50, 70);
+    
+    
+    float phareX = car1X + dirX1 * 70;
+    float phareY = 165;
+    float phareZ = car1Z + dirZ1 * 70;
+
+    spotLight(255, 255, 180, phareX, phareY, phareZ, dirX1, 0.25, dirZ1, PI/2, 10);
+    pointLight(120, 120, 90, phareX, phareY, phareZ);
+    
+    
    } 
 
   if (!etatJeu){
@@ -359,7 +368,14 @@ void draw(){
   
   //creation du ciel 
   pushMatrix();
+  
+  if (modeNuit){
+    tint(20,30,60);
+  }
+  
   drawMap(4000);
+  
+  noTint();
   popMatrix();
   
     //creation du sol
@@ -406,8 +422,9 @@ void draw(){
   shape(voiture);
   popMatrix();
   
-  dessinerMinimap();
-
+  if (etatJeu){
+    dessinerMinimap();
+    }
   }
   
 void dessinerMinimap(){
@@ -416,7 +433,7 @@ void dessinerMinimap(){
   pushStyle();
   camera();
   
-  fill(20,150);
+  fill(0,210);
   noStroke();
   rect(20,20,250,250,10);
   
